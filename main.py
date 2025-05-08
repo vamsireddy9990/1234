@@ -1,5 +1,4 @@
-# Set up Groq client and page configuration first
-import streamlit as st
+# Set up Groq client and page configuration firstimport streamlit as st
 import PyPDF2
 import io
 from groq import Groq
@@ -93,7 +92,7 @@ def extract_text_from_pdf(pdf_file):
 
 def analyze_resume(resume_text, job_description):
     prompt = f"""
-    Analyze the following resume against the job description:
+    You are an expert resume analyzer. Please analyze this resume against the job description provided.
     
     Resume:
     {resume_text}
@@ -101,23 +100,31 @@ def analyze_resume(resume_text, job_description):
     Job Description:
     {job_description}
     
-    Please provide:
-    1. Key strengths matching the job requirements
-    2. Areas of improvement or missing skills
-    3. Specific suggestions to improve the resume
-    4. Overall match percentage and likelihood of selection
+    Provide a detailed analysis including:
+    1. Key strengths and skills that match the job requirements (be specific)
+    2. Missing skills or areas where the candidate needs improvement
+    3. Concrete suggestions to improve the resume
+    4. A percentage match score between the resume and job requirements
+    5. Overall assessment of the candidate's fit for the role
+    
+    Format your response in clear sections with detailed explanations.
     """
     
     with st.spinner('AI is analyzing your resume...'):
         completion = client.chat.completions.create(
             messages=[
                 {
+                    "role": "system",
+                    "content": "You are an expert resume analyzer who provides detailed, actionable feedback."
+                },
+                {
                     "role": "user",
                     "content": prompt
                 }
             ],
-            model="llama-guard-3-8b",
-            temperature=0.5,
+            model="mixtral-8x7b-32768",  # Using a more capable model
+            temperature=0.7,
+            max_tokens=2048
         )
     
     return completion.choices[0].message.content
@@ -187,22 +194,26 @@ if analyze_button:
             # Extract text from resume
             resume_text = extract_text_from_pdf(uploaded_file)
             
-            # Show processing message
-            with st.spinner("🤖 AI is analyzing your resume..."):
-                # Get analysis
-                analysis = analyze_resume(resume_text, job_description)
-                
-                # Display results in an expander
-                st.markdown("### 📊 Analysis Results")
-                
-                # Split analysis into sections and display with formatting
-                sections = analysis.split('\n\n')
-                for section in sections:
-                    if section.strip():
-                        with st.expander(section.split('\n')[0], expanded=True):
-                            st.markdown(section)
-                
+            # Get analysis
+            analysis = analyze_resume(resume_text, job_description)
+            
+            # Display results in an expander
+            st.markdown("### 📊 Analysis Results")
+            
+            # Split analysis into sections and display with formatting
+            sections = analysis.split('\n\n')
+            for section in sections:
+                if section.strip():
+                    # Extract the section title (first line) and content (remaining lines)
+                    lines = section.split('\n')
+                    title = lines[0]
+                    content = '\n'.join(lines[1:]) if len(lines) > 1 else ''
+                    
+                    with st.expander(title, expanded=True):
+                        st.markdown(content)
+            
         except Exception as e:
             st.error(f"⚠️ An error occurred: {str(e)}")
+            st.error("Full error details:", exc_info=True)
     else:
         st.warning("⚠️ Please upload a resume and enter a job description to proceed")
