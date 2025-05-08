@@ -15,7 +15,7 @@ st.set_page_config(
 
 # Set up Groq client
 client = Groq(
-    api_key= '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'
+    api_key= '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'
 )
 
 # Custom CSS with modern design
