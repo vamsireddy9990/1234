@@ -2,17 +2,92 @@ import streamlit as st
 import PyPDF2
 import io
 from groq import Groq
+from datetime import datetime
 
 # Set up Groq client
 client = Groq(
     api_key= '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'
 )
 
+# Custom theme and styling
+st.set_page_config(
+    page_title="AI Resume Analyzer",
+    page_icon="📝",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# Custom CSS with modern design
+st.markdown("""
+<style>
+    /* Main container */
+    .main {
+        background-color: #f8f9fa;
+        padding: 2rem;
+        border-radius: 10px;
+    }
+    
+    /* Headers */
+    h1 {
+        color: #1e3d59;
+        font-family: 'Helvetica Neue', sans-serif;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+    }
+    
+    /* Cards */
+    .stCard {
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
+        margin: 1rem 0;
+        background-color: white;
+    }
+    
+    /* Buttons */
+    .stButton>button {
+        background-color: #17a2b8;
+        color: white;
+        border-radius: 8px;
+        padding: 0.5rem 2rem;
+        font-weight: 600;
+        border: none;
+        transition: all 0.3s ease;
+    }
+    
+    .stButton>button:hover {
+        background-color: #138496;
+        transform: translateY(-2px);
+    }
+    
+    /* Text areas */
+    .stTextArea>div>div>textarea {
+        border-radius: 8px;
+        border: 2px solid #e9ecef;
+        padding: 10px;
+    }
+    
+    /* File uploader */
+    .stFileUploader {
+        border: 2px dashed #17a2b8;
+        border-radius: 8px;
+        padding: 1rem;
+        text-align: center;
+    }
+    
+    /* Progress bar */
+    .stProgress > div > div > div > div {
+        background-color: #17a2b8;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 def extract_text_from_pdf(pdf_file):
     pdf_reader = PyPDF2.PdfReader(pdf_file)
     text = ""
-    for page in pdf_reader.pages:
-        text += page.extract_text()
+    with st.spinner('Extracting text from PDF...'):
+        for page in pdf_reader.pages:
+            text += page.extract_text()
     return text
 
 def analyze_resume(resume_text, job_description):
@@ -32,16 +107,17 @@ def analyze_resume(resume_text, job_description):
     4. Overall match percentage and likelihood of selection
     """
     
-    completion = client.chat.completions.create(
-        messages=[
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ],
-        model="llama-guard-3-8b",
-        temperature=0.5,
-    )
+    with st.spinner('AI is analyzing your resume...'):
+        completion = client.chat.completions.create(
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            model="llama-guard-3-8b",
+            temperature=0.5,
+        )
     
     return completion.choices[0].message.content
 
