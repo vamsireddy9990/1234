@@ -123,7 +123,7 @@ def analyze_resume(resume_text, job_description):
                         "content": prompt
                     }
                 ],
-                model="mixtral-8x7b-32768",  # Using Groq's most capable model
+                model="llama-guard-3-8b",  # Using Groq's most capable model
                 temperature=0.7,
                 max_tokens=4096
             )
