@@ -107,28 +107,35 @@ def analyze_resume(resume_text, job_description):
     3. Concrete suggestions to improve the resume
     4. A percentage match score between the resume and job requirements
     5. Overall assessment of the candidate's fit for the role
-    
     Format your response in clear sections with detailed explanations.
     """
     
-    with st.spinner('AI is analyzing your resume...'):
-        completion = client.chat.completions.create(
-            messages=[
-                {
-                    "role": "system",
-                    "content": "You are an expert resume analyzer who provides detailed, actionable feedback."
-                },
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ],
-            model="llama-guard-3-8b",  # Using a more capable model
-            temperature=0.7,
-            max_tokens=2048
-        )
-    
-    return completion.choices[0].message.content
+    try:
+        with st.spinner('AI is analyzing your resume...'):
+            completion = client.chat.completions.create(
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are an expert resume analyzer who provides detailed, actionable feedback."
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                model="mixtral-8x7b-32768",  # Using Groq's most capable model
+                temperature=0.7,
+                max_tokens=4096
+            )
+        
+        if completion and completion.choices:
+            return completion.choices[0].message.content
+        else:
+            st.error("No response received from the AI model")
+            return None
+    except Exception as e:
+        st.error(f"Error in AI analysis: {str(e)}")
+        return None
 
 # Custom CSS
 st.markdown("""
@@ -198,20 +205,23 @@ if analyze_button:
             # Get analysis
             analysis = analyze_resume(resume_text, job_description)
             
-            # Display results in an expander
-            st.markdown("### 📊 Analysis Results")
-            
-            # Split analysis into sections and display with formatting
-            sections = analysis.split('\n\n')
-            for section in sections:
-                if section.strip():
-                    # Extract the section title (first line) and content (remaining lines)
-                    lines = section.split('\n')
-                    title = lines[0]
-                    content = '\n'.join(lines[1:]) if len(lines) > 1 else ''
-                    
-                    with st.expander(title, expanded=True):
-                        st.markdown(content)
+            if analysis:
+                # Display results in an expander
+                st.markdown("### 📊 Analysis Results")
+                
+                # Split analysis into sections and display with formatting
+                sections = analysis.split('\n\n')
+                for section in sections:
+                    if section.strip():
+                        # Extract the section title (first line) and content (remaining lines)
+                        lines = section.split('\n')
+                        title = lines[0]
+                        content = '\n'.join(lines[1:]) if len(lines) > 1 else ''
+                        
+                        with st.expander(title, expanded=True):
+                            st.markdown(content)
+            else:
+                st.error("Failed to generate analysis. Please try again.")
             
         except Exception as e:
             st.error(f"⚠️ An error occurred: {str(e)}")
