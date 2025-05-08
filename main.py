@@ -1,4 +1,5 @@
 # Set up Groq client and page configuration firstimport streamlit as st
+import streamlit as st
 import PyPDF2
 import io
 from groq import Groq
