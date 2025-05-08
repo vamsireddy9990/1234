@@ -1,20 +1,21 @@
+# Set up Groq client and page configuration first
 import streamlit as st
 import PyPDF2
 import io
 from groq import Groq
 from datetime import datetime
 
-# Set up Groq client
-client = Groq(
-    api_key= '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'
-)
-
-# Custom theme and styling
+# Set page configuration - MUST BE FIRST
 st.set_page_config(
     page_title="AI Resume Analyzer",
     page_icon="📝",
     layout="wide",
     initial_sidebar_state="expanded"
+)
+
+# Set up Groq client
+client = Groq(
+    api_key= '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'
 )
 
 # Custom CSS with modern design
@@ -120,10 +121,6 @@ def analyze_resume(resume_text, job_description):
         )
     
     return completion.choices[0].message.content
-
-# Streamlit UI
-# Set page configuration
-st.set_page_config(page_title="Resume Analysis Tool", layout="wide")
 
 # Custom CSS
 st.markdown("""
