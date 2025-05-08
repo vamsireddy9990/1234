@@ -123,7 +123,7 @@ def analyze_resume(resume_text, job_description):
                     "content": prompt
                 }
             ],
-            model="mixtral-8x7b-32768",  # Using a more capable model
+            model="llama-guard-3-8b",  # Using a more capable model
             temperature=0.7,
             max_tokens=2048
         )
